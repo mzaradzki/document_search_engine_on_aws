@@ -1,5 +1,9 @@
 # Document Search Engine On AWS
-indexer and scrapper
+Indexer and Scrapper
+
+
+## Medium blog for detailed explanation
+https://medium.com/@m.zaradzki/build-your-own-document-search-engine-using-amazon-web-services-82d5b165d96c
 
 
 ## Notes on using non-default packages in Lambda Nodejs
