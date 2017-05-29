@@ -1,0 +1,80 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>LEGIDATA</title>
+        <script src="aws-sdk-2.49.0.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+        <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+        <script src="amazon.js"></script> <!-- setups AWS.config.credentials and lambda -->
+        <script type="text/javascript">
+
+            var pullResults; // declare here to have access in browser at test time
+            function runSearch(querystring) {
+                var Payload = {
+                    'query': querystring,
+                    'size': 10,
+                    'start':0
+                };
+                var lambdaParams = {
+                    FunctionName : 'docSearcher',
+                    //InvocationType : 'Event',
+                    InvocationType : 'RequestResponse',
+                    Payload: JSON.stringify(Payload),
+                    LogType : 'None'
+                };
+                lambda.invoke(lambdaParams, function(err, lambdadata) {
+                    if (err) {
+                        console.log('Lambda ERROR');
+                        console.log(err);
+                    }
+                    else {
+                        console.log('Lambda SUCCESS');
+                        console.log(lambdadata.StatusCode);
+                        pullResults = JSON.parse(lambdadata.Payload);
+                        console.log(pullResults);
+
+                        $("#documentlist ul li").remove(); // clean the list before appending
+                        
+                        pullResults.hits.hit.forEach( function(hit, index) {
+                            console.log(hit);
+                            var docname = hit.fields.resourcename;
+                            $("#documentlist ul").append('<li><a id="'+docname+'" href="#">'+docname+'</a></li>');
+                        })
+                        $("#documentlist").show();
+                    }
+                });
+            }
+
+            function onClickSearch() {
+                var querystring = document.getElementById('inputQuery').value;
+                console.log(querystring);
+                runSearch(querystring);
+            }
+
+        </script>
+    </head>
+    <body>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-10 col-md-offset-1">
+
+                    <form>
+                        <div class="form-group">
+                            <label for="inputQuery">Query</label>
+                            <input class="form-control" id="inputQuery" placeholder="your query here">
+                        </div>
+                      <!--<button class="btn btn-info" id="search" onclick="onClickSearch()">Search</button>-->
+                      <input class="btn btn-danger" type="button" value="Search" onclick="onClickSearch()">
+                    </form>
+
+                    <div id="documentlist" style="display: none;">
+                        <ul></ul>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
